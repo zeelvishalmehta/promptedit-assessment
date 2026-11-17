@@ -1,66 +1,166 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# PromptEdit Assessment – Pixelforge Image Generation
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A Laravel and Vue.js application that integrates with the Pixelforge API to generate images, estimate generation costs, calculate actual token-based charges, and maintain generation history.
 
-## About Laravel
+## Project Overview
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Users can register, log in, submit image-generation requests, view estimated prices before generation, and track the status and cost of their requests.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+The application integrates with the asynchronous Pixelforge API and supports webhook notifications, background processing, and scheduled polling to synchronize generation statuses.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Features
 
-## Learning Laravel
+### User Authentication
+- User registration and login.
+- Authenticated image-generation requests.
+- User-specific generation history.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### Image Generation
+- Submit a text prompt.
+- Select image dimensions.
+- Choose generation quality.
+- Optionally provide reference image URLs.
+- Submit requests to the Pixelforge API.
+- Track generation status: queued, processing, succeeded, or failed.
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+### Pricing and Cost Calculation
+- Retrieve pricing rates from Pixelforge.
+- Estimate generation costs before submission.
+- Display estimated customer pricing with a 25% markup.
+- Calculate actual provider costs using token usage returned by Pixelforge.
+- Calculate final customer charges using the same 25% markup.
+- Failed generations have zero actual cost.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Webhook Integration
+- Receive Pixelforge generation events.
+- Verify webhook signatures using HMAC SHA-256.
+- Validate webhook timestamps.
+- Prevent duplicate event storage using unique event IDs.
+- Process webhook events through Laravel background jobs.
+- Synchronize generation status and actual usage information.
 
-## Laravel Sponsors
+### Background Processing and Polling
+- Process webhook events asynchronously using Laravel queues.
+- Retry failed jobs with configured backoff intervals.
+- Run scheduled polling for queued and processing generations.
+- Refresh generation history automatically while requests are pending.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### Generation History
+- View previous generation requests.
+- View generated images and generation statuses.
+- See estimated and actual provider/customer costs.
+- View error information for failed generations.
+- Navigate through paginated generation history.
 
-### Premium Partners
+## Technology Stack
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+| Component | Technology |
+|---|---|
+| Backend | PHP 8.2+, Laravel 12 |
+| Frontend | Vue.js 3 |
+| SPA Integration | Inertia.js |
+| Styling | Tailwind CSS |
+| Database | MySQL |
+| API Integration | Pixelforge REST API |
+| Background Jobs | Laravel Queue |
+| Scheduling | Laravel Scheduler |
+| Build Tool | Vite |
+| Testing | PHPUnit / Laravel Tests |
 
-## Contributing
+## Application Architecture
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+The application follows a service-oriented Laravel structure.
 
-## Code of Conduct
+- **GenerationController:** Handles generation requests, pricing estimates, and generation history.
+- **PixelforgeService:** Handles communication with the external Pixelforge API.
+- **PricingCalculator:** Calculates estimated and actual generation costs.
+- **GenerationSyncService:** Synchronizes generation status and actual usage with the local database.
+- **PixelforgeWebhookController:** Receives and verifies webhook events.
+- **ProcessPixelforgeWebhook:** Processes webhook events asynchronously.
+- **SyncPendingGenerations:** Synchronizes pending generations through scheduled polling.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Installation and Local Setup
 
-## Security Vulnerabilities
+### Prerequisites
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+- PHP 8.2 or later
+- Composer
+- Node.js and npm
+- MySQL
+- Pixelforge API account and credentials
 
-## License
+### 1. Clone the repository
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```bash
+git clone https://github.com/zeelvishalmehta/promptedit-assessment.git
+cd promptedit-assessment
+```
+
+### 2. Install dependencies
+
+```bash
+composer install
+npm install
+```
+
+### 3. Configure environment variables
+
+Create your local environment file:
+
+```bash
+cp .env.example .env
+```
+
+Generate the Laravel application key:
+
+```bash
+php artisan key:generate
+```
+
+Configure your database connection in `.env`:
+
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=promptedit_assessment
+DB_USERNAME=root
+DB_PASSWORD=
+```
+
+Configure Pixelforge credentials:
+
+```env
+PIXELFORGE_BASE_URL=https://pixelforge.promptedit.dev/v1
+PIXELFORGE_API_KEY=your_pixelforge_api_key
+PIXELFORGE_WEBHOOK_SECRET=your_pixelforge_webhook_secret
+```
+
+**Important:** Never commit your `.env` file or expose API keys and webhook secrets.
+
+### 4. Run database migrations
+
+Create the database in MySQL, then run:
+
+```bash
+php artisan migrate
+```
+
+### 5. Start the application
+
+Start the Laravel development server:
+
+```bash
+php artisan serve
+```
+
+Start the Vue/Vite development server in another terminal:
+
+```bash
+npm run dev
+```
+
+### 6. Start the queue worker
+
+```bash
+php artisan queue:work --tries=6 --timeout
