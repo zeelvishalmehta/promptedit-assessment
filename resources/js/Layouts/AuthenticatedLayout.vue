@@ -39,6 +39,13 @@ const showingNavigationDropdown = ref(false);
                                 >
                                     Dashboard
                                 </NavLink>
+
+                                <NavLink
+                                    :href="route('generations.index')"
+                                    :active="route().current('generations.*')"
+                                >
+                                    Generation History
+                                </NavLink>
                             </div>
                         </div>
 
@@ -145,6 +152,13 @@ const showingNavigationDropdown = ref(false);
                             :active="route().current('dashboard')"
                         >
                             Dashboard
+                        </ResponsiveNavLink>
+
+                        <ResponsiveNavLink
+                            :href="route('generations.index')"
+                            :active="route().current('generations.*')"
+                        >
+                            Generation History
                         </ResponsiveNavLink>
                     </div>
 
