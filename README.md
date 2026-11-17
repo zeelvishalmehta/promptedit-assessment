@@ -163,4 +163,67 @@ npm run dev
 ### 6. Start the queue worker
 
 ```bash
-php artisan queue:work --tries=6 --timeout
+php artisan queue:work --tries=6 --timeout=60
+```
+
+### 7. Start the Laravel scheduler
+
+For local development:
+
+```bash
+php artisan schedule:work
+```
+
+The scheduler runs the pending-generation synchronization command every minute.
+
+## Webhook Configuration
+
+Configure the webhook endpoint in your Pixelforge account:
+
+```text
+POST /webhooks/pixelforge
+```
+
+For local development, use a publicly accessible HTTPS tunnel or URL so Pixelforge can reach your application.
+
+The webhook signing secret must match the value configured in `PIXELFORGE_WEBHOOK_SECRET`.
+
+Supported events include:
+
+- `generation.processing`
+- `generation.succeeded`
+- `generation.failed`
+- `ping`
+
+## Running Tests
+
+Run the complete Laravel test suite:
+
+```bash
+php artisan test
+```
+
+The tests cover authentication, pricing calculations, generation synchronization, webhook duplicate handling, and generation history access.
+
+## GitHub Repository
+
+[https://github.com/zeelvishalmehta/promptedit-assessment](https://github.com/zeelvishalmehta/promptedit-assessment)
+
+## Project Status
+
+Core application functionality and automated tests have been implemented.
+
+- Laravel authentication
+- Pixelforge API integration
+- Image generation and history
+- Estimated and actual pricing
+- Webhook signature verification
+- Background queue processing
+- Scheduled polling
+- Automated tests
+
+Production deployment and public webhook configuration are the next steps.
+
+---
+
+**Built with Laravel, Vue.js, Inertia.js, and Pixelforge API.**
