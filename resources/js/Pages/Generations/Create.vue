@@ -5,9 +5,6 @@ import { Head } from '@inertiajs/vue3';
 import axios from 'axios';
 import { ref, watch } from 'vue';
 
-watch([prompt, size, quality, referenceImagesText], () => {
-    estimatedPrice.value = null;
-});
 
 const prompt = ref('');
 const size = ref('1024x1024');
@@ -21,6 +18,11 @@ const isSubmitting = ref(false);
 const errorMessage = ref('');
 const successMessage = ref('');
 const generation = ref(null);
+
+watch([prompt, size, quality, referenceImagesText], () => {
+    estimatedPrice.value = null;
+});
+
 
 function getPayload() {
     return {
