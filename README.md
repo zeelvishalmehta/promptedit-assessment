@@ -2,20 +2,30 @@
 
 A Laravel and Vue.js application that integrates with the Pixelforge API to generate images, estimate generation costs, calculate actual token-based charges, and maintain generation history.
 
+## Live Application
+
+**Application URL:** https://promptedit-assessment.ethiodeploy.app/
+
+**GitHub Repository:** https://github.com/zeelvishalmehta/promptedit-assessment
+
+Users can register, log in, submit image-generation requests, and view their generation history through the deployed application.
+
 ## Project Overview
 
 Users can register, log in, submit image-generation requests, view estimated prices before generation, and track the status and cost of their requests.
 
-The application integrates with the asynchronous Pixelforge API and supports webhook notifications, background processing, and scheduled polling to synchronize generation statuses.
+The application integrates with the asynchronous Pixelforge API and supports webhook notifications, job processing, and scheduled polling to synchronize generation statuses.
 
 ## Features
 
 ### User Authentication
+
 - User registration and login.
 - Authenticated image-generation requests.
 - User-specific generation history.
 
 ### Image Generation
+
 - Submit a text prompt.
 - Select image dimensions.
 - Choose generation quality.
@@ -24,6 +34,7 @@ The application integrates with the asynchronous Pixelforge API and supports web
 - Track generation status: queued, processing, succeeded, or failed.
 
 ### Pricing and Cost Calculation
+
 - Retrieve pricing rates from Pixelforge.
 - Estimate generation costs before submission.
 - Display estimated customer pricing with a 25% markup.
@@ -32,6 +43,7 @@ The application integrates with the asynchronous Pixelforge API and supports web
 - Failed generations have zero actual cost.
 
 ### Webhook Integration
+
 - Receive Pixelforge generation events.
 - Verify webhook signatures using HMAC SHA-256.
 - Validate webhook timestamps.
@@ -40,12 +52,15 @@ The application integrates with the asynchronous Pixelforge API and supports web
 - Synchronize generation status and actual usage information.
 
 ### Background Processing and Polling
-- Process webhook events asynchronously using Laravel queues.
+
+- Process webhook events using Laravel queues.
 - Retry failed jobs with configured backoff intervals.
 - Run scheduled polling for queued and processing generations.
 - Refresh generation history automatically while requests are pending.
+- Support synchronous queue processing in environments where persistent background workers are unavailable.
 
 ### Generation History
+
 - View previous generation requests.
 - View generated images and generation statuses.
 - See estimated and actual provider/customer costs.
@@ -76,7 +91,7 @@ The application follows a service-oriented Laravel structure.
 - **PricingCalculator:** Calculates estimated and actual generation costs.
 - **GenerationSyncService:** Synchronizes generation status and actual usage with the local database.
 - **PixelforgeWebhookController:** Receives and verifies webhook events.
-- **ProcessPixelforgeWebhook:** Processes webhook events asynchronously.
+- **ProcessPixelforgeWebhook:** Processes webhook events through Laravel jobs.
 - **SyncPendingGenerations:** Synchronizes pending generations through scheduled polling.
 
 ## Installation and Local Setup
@@ -136,6 +151,12 @@ PIXELFORGE_API_KEY=your_pixelforge_api_key
 PIXELFORGE_WEBHOOK_SECRET=your_pixelforge_webhook_secret
 ```
 
+For local queue processing, configure:
+
+```env
+QUEUE_CONNECTION=database
+```
+
 **Important:** Never commit your `.env` file or expose API keys and webhook secrets.
 
 ### 4. Run database migrations
@@ -162,6 +183,8 @@ npm run dev
 
 ### 6. Start the queue worker
 
+For local development:
+
 ```bash
 php artisan queue:work --tries=6 --timeout=60
 ```
@@ -178,10 +201,10 @@ The scheduler runs the pending-generation synchronization command every minute.
 
 ## Webhook Configuration
 
-Configure the webhook endpoint in your Pixelforge account:
+Configure the following webhook endpoint in your Pixelforge account:
 
 ```text
-POST /webhooks/pixelforge
+https://promptedit-assessment.ethiodeploy.app/webhooks/pixelforge
 ```
 
 For local development, use a publicly accessible HTTPS tunnel or URL so Pixelforge can reach your application.
@@ -195,6 +218,32 @@ Supported events include:
 - `generation.failed`
 - `ping`
 
+The application verifies webhook signatures and timestamps before processing events and prevents duplicate event storage.
+
+## Production Deployment
+
+The application is deployed using EthioDeploy's free hosting plan.
+
+**Live URL:** https://promptedit-assessment.ethiodeploy.app/
+
+Production environment variables include:
+
+- `APP_ENV=production`
+- `APP_DEBUG=false`
+- `APP_URL`
+- `APP_KEY`
+- `DB_CONNECTION=mysql`
+- `PIXELFORGE_BASE_URL`
+- `PIXELFORGE_API_KEY`
+- `PIXELFORGE_WEBHOOK_SECRET`
+- `QUEUE_CONNECTION=sync`
+
+Database connection details are provided through the hosting platform's managed MySQL add-on.
+
+The free hosting plan may put the application to sleep after a period of inactivity. The first request after sleeping may take longer while the application starts.
+
+Persistent background workers and scheduled tasks are not continuously available on this plan. Synchronous queue processing is configured for webhook jobs in production.
+
 ## Running Tests
 
 Run the complete Laravel test suite:
@@ -203,26 +252,50 @@ Run the complete Laravel test suite:
 php artisan test
 ```
 
-The tests cover authentication, pricing calculations, generation synchronization, webhook duplicate handling, and generation history access.
+The automated tests cover:
 
-## GitHub Repository
+- Authentication and access control.
+- Pricing calculations.
+- Generation synchronization.
+- Webhook signature verification.
+- Duplicate webhook event handling.
+- Generation history access.
 
-[https://github.com/zeelvishalmehta/promptedit-assessment](https://github.com/zeelvishalmehta/promptedit-assessment)
+## Continuous Integration
+
+GitHub Actions is configured to run automated checks when code is pushed or a pull request is created.
+
+The workflow:
+
+- Installs PHP and Composer dependencies.
+- Installs Node.js dependencies.
+- Builds frontend assets.
+- Configures a MySQL test database.
+- Runs database migrations.
+- Executes the Laravel automated test suite.
 
 ## Project Status
 
-Core application functionality and automated tests have been implemented.
+The core application functionality has been implemented, tested, and deployed successfully.
 
-- Laravel authentication
-- Pixelforge API integration
-- Image generation and history
-- Estimated and actual pricing
-- Webhook signature verification
-- Background queue processing
-- Scheduled polling
-- Automated tests
+### Completed Features
 
-Production deployment and public webhook configuration are the next steps.
+- Laravel authentication.
+- Pixelforge API integration.
+- Image generation and status tracking.
+- Estimated and actual token-based pricing with a 25% markup.
+- Webhook signature verification using HMAC SHA-256.
+- Duplicate webhook event protection.
+- Generation synchronization through webhooks.
+- Scheduled polling implementation.
+- User-specific generation history.
+- Automated Laravel test suite.
+- GitHub Actions CI workflow.
+- Public production deployment.
+
+**Live Application:** https://promptedit-assessment.ethiodeploy.app/
+
+**GitHub Repository:** https://github.com/zeelvishalmehta/promptedit-assessment
 
 ---
 
