@@ -40,6 +40,10 @@ class PixelforgeWebhookTest extends TestCase
 
     private function postSignedWebhook(array $payload)
     {
+        config([
+         'services.pixelforge.webhook_secret' => 'test-webhook-secret',
+        ]);
+
         $body = json_encode($payload);
         $timestamp = now()->timestamp;
 
